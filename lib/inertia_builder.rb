@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'inertia_rails'
-require 'inertia_builder/version'
 require 'inertia_builder/handler'
 require 'inertia_builder/controller'
 require 'inertia_builder/renderer'
