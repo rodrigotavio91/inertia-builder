@@ -5,7 +5,7 @@ module InertiaBuilder
     extend ActiveSupport::Concern
 
     included do
-      layout -> { false if inertia_json_request? }
+      layout -> { inertia_json_request? ? false : 'application' }
 
       before_action :force_json_response_with_html_template, if: -> { inertia_json_request? }
     end

@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require 'jbuilder/jbuilder_template'
 require 'inertia_builder/handler'
 require 'inertia_builder/controller'
 require 'inertia_builder/renderer'
