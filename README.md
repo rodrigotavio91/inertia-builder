@@ -11,7 +11,7 @@ Here is an example:
 
 class MessagesController < ApplicationController
   # Shared variables will be automatically included in the props.
-  inertia_share user: Current.user
+  inertia_share user: lambda { Current.user }
 
   def show
     @message = Message.find(params[:id])
