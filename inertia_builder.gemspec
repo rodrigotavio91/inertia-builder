@@ -16,6 +16,10 @@ Gem::Specification.new do |s|
   s.add_dependency 'inertia_rails', '>= 3.5'
   s.add_dependency 'jbuilder', '>= 2.0'
 
+  s.add_development_dependency 'rails', '>= 7.0.0'
+  s.add_development_dependency 'rails-controller-testing'
+  s.add_development_dependency 'rake'
+
   s.files = Dir['lib/**/*']
   s.test_files = Dir['test/**/*']
 
