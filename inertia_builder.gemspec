@@ -13,12 +13,12 @@ Gem::Specification.new do |s|
 
   s.required_ruby_version = '>= 3.0.0'
 
-  s.add_dependency 'inertia_rails', '>= 3.5'
-  s.add_dependency 'jbuilder', '>= 2.0'
+  s.add_dependency 'inertia_rails', '~> 3.5'
+  s.add_dependency 'jbuilder', '~> 2.0'
 
-  s.add_development_dependency 'rails', '>= 7.0.0'
-  s.add_development_dependency 'rails-controller-testing'
-  s.add_development_dependency 'rake'
+  s.add_development_dependency 'rails', '~> 7.0'
+  s.add_development_dependency 'rails-controller-testing', '~> 1.0'
+  s.add_development_dependency 'rake', '~> 13.3'
 
   s.files = Dir['lib/**/*']
   s.test_files = Dir['test/**/*']
