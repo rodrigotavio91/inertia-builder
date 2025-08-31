@@ -4,6 +4,7 @@ require "active_model"
 require 'action_view/testing/resolvers'
 
 class User < Struct.new(:id, :first_name, :last_name, :email)
+  extend ActiveModel::Naming
   include ActiveModel::Conversion
 end
 
@@ -104,6 +105,20 @@ class InertiaBuilderTest < Minitest::Test
         prop.partial! user
       end
     INERTIA
+
+    expected_props = { users: }
+
+    assert_equal inertia_html_with_props(expected_props), render_view(template, assigns: { users: })
+    assert_equal inertia_json_with_props(expected_props), render_view(template, assigns: { users: }, json: true)
+  end
+
+  def test_shorthand_collection_partial_prop
+    users = [
+      User.new({ id: 42, first_name: 'John', last_name: 'Doe', email: 'john@email.com' }),
+      User.new({ id: 43, first_name: 'Jane', last_name: 'Smith', email: 'jane@email.com' }),
+    ]
+
+    template = "prop.users @users, partial: 'users/user', as: :user"
 
     expected_props = { users: }
 
