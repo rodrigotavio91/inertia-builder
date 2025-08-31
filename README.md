@@ -32,14 +32,14 @@ prop.message do
   end
 
   prop.comments @message.comments do |comment|
-    json.partial! comment
+    prop.partial! comment
   end
 end
 ```
 
 This will provide the following props to your React component:
 
-```javascript
+```jsx
 // app/javascript/pages/messages/show.jsx
 
 export default function Message({ user, message }) {
