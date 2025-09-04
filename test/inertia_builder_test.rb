@@ -1,6 +1,6 @@
 require 'test_helper'
 require 'action_view'
-require "active_model"
+require 'active_model'
 require 'action_view/testing/resolvers'
 
 class User < Struct.new(:id, :first_name, :last_name, :email)
@@ -17,7 +17,7 @@ class InertiaBuilderTest < Minitest::Test
   INERTIA
 
   PARTIALS = {
-    "users/_user.html.inertia" => USER_PARTIAL,
+    'users/_user.html.inertia' => USER_PARTIAL
   }
 
   def test_basic_html_rendering
@@ -73,10 +73,11 @@ class InertiaBuilderTest < Minitest::Test
       end
     INERTIA
 
-    expected_props = { products: }
+    expected_props = { products: products }
 
-    assert_equal inertia_html_with_props(expected_props), render_view(template, assigns: { products: })
-    assert_equal inertia_json_with_props(expected_props), render_view(template, assigns: { products: }, json: true)
+    assert_equal inertia_html_with_props(expected_props), render_view(template, assigns: { products: products })
+    assert_equal inertia_json_with_props(expected_props),
+                 render_view(template, assigns: { products: products }, json: true)
   end
 
   def test_basic_partial_prop
@@ -88,16 +89,16 @@ class InertiaBuilderTest < Minitest::Test
       end
     INERTIA
 
-    expected_props = { user: }
+    expected_props = { user: user }
 
-    assert_equal inertia_html_with_props(expected_props), render_view(template, assigns: { user: })
-    assert_equal inertia_json_with_props(expected_props), render_view(template, assigns: { user: }, json: true)
+    assert_equal inertia_html_with_props(expected_props), render_view(template, assigns: { user: user })
+    assert_equal inertia_json_with_props(expected_props), render_view(template, assigns: { user: user }, json: true)
   end
 
   def test_collection_partial_prop
     users = [
       User.new({ id: 42, first_name: 'John', last_name: 'Doe', email: 'john@email.com' }),
-      User.new({ id: 43, first_name: 'Jane', last_name: 'Smith', email: 'jane@email.com' }),
+      User.new({ id: 43, first_name: 'Jane', last_name: 'Smith', email: 'jane@email.com' })
     ]
 
     template = <<~INERTIA
@@ -106,24 +107,24 @@ class InertiaBuilderTest < Minitest::Test
       end
     INERTIA
 
-    expected_props = { users: }
+    expected_props = { users: users }
 
-    assert_equal inertia_html_with_props(expected_props), render_view(template, assigns: { users: })
-    assert_equal inertia_json_with_props(expected_props), render_view(template, assigns: { users: }, json: true)
+    assert_equal inertia_html_with_props(expected_props), render_view(template, assigns: { users: users })
+    assert_equal inertia_json_with_props(expected_props), render_view(template, assigns: { users: users }, json: true)
   end
 
   def test_shorthand_collection_partial_prop
     users = [
       User.new({ id: 42, first_name: 'John', last_name: 'Doe', email: 'john@email.com' }),
-      User.new({ id: 43, first_name: 'Jane', last_name: 'Smith', email: 'jane@email.com' }),
+      User.new({ id: 43, first_name: 'Jane', last_name: 'Smith', email: 'jane@email.com' })
     ]
 
     template = "prop.users @users, partial: 'users/user', as: :user"
 
-    expected_props = { users: }
+    expected_props = { users: users }
 
-    assert_equal inertia_html_with_props(expected_props), render_view(template, assigns: { users: })
-    assert_equal inertia_json_with_props(expected_props), render_view(template, assigns: { users: }, json: true)
+    assert_equal inertia_html_with_props(expected_props), render_view(template, assigns: { users: users })
+    assert_equal inertia_json_with_props(expected_props), render_view(template, assigns: { users: users }, json: true)
   end
 
   def test_nil_prop_block
@@ -132,7 +133,6 @@ class InertiaBuilderTest < Minitest::Test
         prop.nil!
       end
     INERTIA
-
 
     expected_props = { current_user: nil }
 
@@ -166,11 +166,11 @@ class InertiaBuilderTest < Minitest::Test
   def inertia_json_with_props(props)
     {
       component: '/',
-      props: { errors: { }}.merge(props),
+      props: { errors: {} }.merge(props),
       url: '/',
       version: nil,
       encryptHistory: false,
-      clearHistory: false,
+      clearHistory: false
     }.to_json
   end
 end
