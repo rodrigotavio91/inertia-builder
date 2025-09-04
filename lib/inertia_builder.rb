@@ -7,7 +7,7 @@ require 'inertia_builder/renderer'
 require 'inertia_builder/railtie' if defined?(Rails)
 
 class JbuilderTemplate
-  self.template_lookup_options = { handlers: [:inertia] }
+  self.template_lookup_options = { handlers: %i[inertia jbuilder] }
 end
 
 module InertiaBuilder
