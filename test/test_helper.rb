@@ -16,5 +16,9 @@ Class.new(Rails::Application) do
   config.eager_load = false
 end.initialize!
 
+InertiaRails.configure do |c|
+  c.always_include_errors_hash = true # Fix deprecated warning in tests.
+end
+
 # Touch AV::Base in order to trigger :action_view on_load hook before running the tests
 ActionView::Base.inspect

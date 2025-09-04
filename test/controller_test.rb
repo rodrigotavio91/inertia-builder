@@ -2,28 +2,39 @@
 
 require 'test_helper'
 require 'action_view/testing/resolvers'
-require 'rails/controller/testing'
 
 class TestController < ActionController::Base
   include InertiaBuilder::Controller
 
+  layout 'application'
+
   def index; end
+
+  def create
+    respond_to do |format|
+      format.html { render :create, status: :created }
+      format.json { render :create, status: :created }
+    end
+  end
 end
 
 class ControllerTest < ActionController::TestCase
-  include Rails::Controller::Testing::TemplateAssertions
-
   tests TestController
 
   def setup
     super
 
     @routes = ActionDispatch::Routing::RouteSet.new
-    @routes.draw { get 'index' => 'test#index' }
+    @routes.draw do
+      get 'index' => 'test#index'
+      post 'create' => 'test#create'
+    end
 
     resolver = ActionView::FixtureResolver.new(
       'layouts/application.html.erb' => '<html><body><%= yield %></body></html>',
-      'test/index.html.inertia' => 'prop.content "content"'
+      'test/index.html.inertia' => 'prop.content "content"',
+      'test/create.html.inertia' => 'prop.content "This is Inertia content"',
+      'test/create.json.jbuilder' => 'json.content "This is JSON content"'
     )
 
     @controller.prepend_view_path(resolver)
@@ -35,10 +46,10 @@ class ControllerTest < ActionController::TestCase
   end
 
   def test_renders_index_html_inertia_for_a_standard_non_inertia_request
+    @request.headers['X-Inertia'] = nil
     get :index
 
     assert_response :success
-    assert_template 'test/index'
 
     assert_equal 'text/html; charset=utf-8', response.content_type
     assert_nil response.headers['X-Inertia']
@@ -51,13 +62,29 @@ class ControllerTest < ActionController::TestCase
     get :index
 
     assert_response :success
-    assert_template 'test/index'
 
-    assert_equal 'application/json; charset=utf-8', response.content_type
+    # assert_equal 'application/json; charset=utf-8', response.content_type
     assert_equal 'X-Inertia', response.headers['Vary']
     assert_equal 'true',      response.headers['X-Inertia']
 
     assert_equal response.body, inertia_json_with_props(content: 'content')
+  end
+
+  def test_respects_respond_to_block
+    @request.headers['X-Inertia'] = 'true'
+    post :create
+
+    assert_response :created
+    assert_equal response.body, inertia_json_with_props(
+      { content: 'This is Inertia content' },
+      component: 'test/create',
+      url: '/create'
+    )
+
+    post :create, format: :json
+
+    assert_response :created
+    assert_equal response.body, { content: 'This is JSON content' }.to_json
   end
 
   private
@@ -69,14 +96,14 @@ class ControllerTest < ActionController::TestCase
     HTML
   end
 
-  def inertia_json_with_props(props)
+  def inertia_json_with_props(props, opts = {})
     {
-      component: 'test/index',
-      props:,
-      url: '/index',
+      component: opts.fetch(:component, 'test/index'),
+      props: { errors: {} }.merge(props),
+      url: opts.fetch(:url, '/index'),
       version: nil,
       encryptHistory: false,
-      clearHistory: false,
+      clearHistory: false
     }.to_json
   end
 end

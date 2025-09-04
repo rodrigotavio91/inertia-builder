@@ -166,7 +166,7 @@ class InertiaBuilderTest < Minitest::Test
   def inertia_json_with_props(props)
     {
       component: '/',
-      props:,
+      props: { errors: { }}.merge(props),
       url: '/',
       version: nil,
       encryptHistory: false,
