@@ -31,9 +31,7 @@ prop.message do
     prop.url url_for(@message.author, format: :json)
   end
 
-  prop.comments @message.comments do |comment|
-    prop.partial! comment
-  end
+  prop.comments @message.comments, partial: 'comments/comment', as: :comment, cached: true # Enable fragment caching.
 end
 ```
 
@@ -63,6 +61,68 @@ export default function Message({ user, message }) {
 
 InertiaBuilder extends the Jbuilder DSL. See the [Jbuilder documentation](https://github.com/rails/jbuilder) for more examples.
 
+## Partial Reloads
+
+InertiaBuilder supports partial reloads using Inertia's [partial reload feature](https://inertiajs.com/partial-reloads).
+
+### Lazy Data Evaluation
+
+Props are lazily evaluated by default. This means that if a prop is not requested in a partial reload, it will not be evaluated.
+
+### Optional
+
+Optional props are only fetched if they are requested in a partial reload. This is useful for expensive props that are not always needed.
+
+```ruby
+prop.id @post.id
+prop.title @post.title
+prop.optional! do
+  prop.comments @message.comments
+end
+```
+
+### Always
+
+Props declared inside an `always!` block are always fetched, even if they are not requested in a partial reload.
+
+```ruby
+prop.always! do
+  prop.id @post.id
+  prop.title @post.title
+end
+```
+
+## Deferred Props
+
+InertiaBuilder supports deferred props using Inertia's [deferred props feature](https://inertiajs.com/server-side-setup#deferred-props).
+
+```ruby
+prop.id @post.id
+prop.title @post.title
+prop.defer! do
+  prop.comments @post.comments
+end
+```
+
+The `comments` prop will be fetched in a separate request after the initial page load.
+
+You can also group deferred props. Each group will be fetched in a separate request.
+
+```ruby
+prop.id @post.id
+prop.title @post.title
+prop.defer! group: :author do
+  prop.author do
+    prop.id @post.author.id
+    prop.name @post.author.name
+  end
+end
+prop.defer! group: :comments do
+  prop.comments @post.comments
+end
+```
+
+
 ## Installation
 
 Add the `inertia_builder` gem to your Gemfile:
@@ -90,7 +150,6 @@ Contributions are welcome!
 - Fork the repository and create a feature branch.
 - Make your changes with clear, focused commits.
 - Add tests for new behavior and ensure the test suite passes.
-- Run linters/formatters if configured.
 - Open a pull request describing the change and motivation.
 
 For significant changes, consider opening an issue first to discuss what you’d like to change.
