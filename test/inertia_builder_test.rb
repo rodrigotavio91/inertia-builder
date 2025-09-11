@@ -8,6 +8,11 @@ class User < Struct.new(:id, :first_name, :last_name, :email)
   include ActiveModel::Conversion
 end
 
+class Item < Struct.new(:id, :title)
+  extend ActiveModel::Naming
+  include ActiveModel::Conversion
+end
+
 class InertiaBuilderTest < Minitest::Test
   USER_PARTIAL = <<~INERTIA
     prop.id user.id
@@ -16,8 +21,14 @@ class InertiaBuilderTest < Minitest::Test
     prop.email user.email
   INERTIA
 
+  ITEM_PARTIAL = <<~INERTIA
+    prop.id item.id
+    prop.title item.title
+  INERTIA
+
   PARTIALS = {
-    'users/_user.html.inertia' => USER_PARTIAL
+    'users/_user.html.inertia' => USER_PARTIAL,
+    'items/_item.html.inertia' => ITEM_PARTIAL
   }
 
   def test_basic_html_rendering
@@ -119,12 +130,23 @@ class InertiaBuilderTest < Minitest::Test
       User.new({ id: 43, first_name: 'Jane', last_name: 'Smith', email: 'jane@email.com' })
     ]
 
-    template = "prop.users @users, partial: 'users/user', as: :user"
+    items = [
+      Item.new({ id: 1, title: 'Item 1' }),
+      Item.new({ id: 2, title: 'Item 2' })
+    ]
 
-    expected_props = { users: users }
+    template = <<~INERTIA
+      prop.data do
+        prop.users @users, partial: 'users/user', as: :user
+        prop.items @items, partial: 'items/item', as: :item
+      end
+    INERTIA
 
-    assert_equal inertia_html_with_props(expected_props), render_view(template, assigns: { users: users })
-    assert_equal inertia_json_with_props(expected_props), render_view(template, assigns: { users: users }, json: true)
+    expected_props = { data: { users: users, items: items } }
+
+    assert_equal inertia_json_with_props(expected_props),
+                 render_view(template, assigns: { users: users, items: items }, json: true)
+    assert_equal inertia_html_with_props(expected_props), render_view(template, assigns: { users: users, items: items })
   end
 
   def test_nil_prop_block

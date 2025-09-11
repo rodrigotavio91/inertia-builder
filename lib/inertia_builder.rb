@@ -66,10 +66,11 @@ module InertiaBuilder
     end
 
     def _scope
+      has_parent_scope = @in_scope
       @in_scope = true
       super
     ensure
-      @in_scope = false
+      @in_scope = false unless has_parent_scope
     end
 
     def _merge_values(current_value, updates)
