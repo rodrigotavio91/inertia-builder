@@ -61,6 +61,10 @@ export default function Message({ user, message }) {
 
 InertiaBuilder extends the Jbuilder DSL. See the [Jbuilder documentation](https://github.com/rails/jbuilder) for more examples.
 
+## Demo app
+
+For an example app using InertiaBuilder, check out the [Trellix clone](https://github.com/rodrigotavio91/trellix-inertia-builder).
+
 ## Partial Reloads
 
 InertiaBuilder supports partial reloads using Inertia's [partial reload feature](https://inertiajs.com/partial-reloads).
