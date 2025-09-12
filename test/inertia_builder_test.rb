@@ -166,7 +166,10 @@ class InertiaBuilderTest < Minitest::Test
     template = <<~INERTIA
       prop.id 1
       prop.optional! do
-        prop.user 'User'
+        prop.user do
+          prop.id 1
+          prop.email 'user@email.com'
+        end
         prop.calculation 'Calculation'
       end
     INERTIA
@@ -176,7 +179,7 @@ class InertiaBuilderTest < Minitest::Test
       'X-Inertia-Partial-Component' => '/'
     }
     assert_equal inertia_json_with_props({ id: 1 }), render_view(template, json: true)
-    assert_equal inertia_json_with_props({ user: 'User', calculation: 'Calculation' }),
+    assert_equal inertia_json_with_props({ user: { id: 1, email: 'user@email.com' }, calculation: 'Calculation' }),
                  render_view(template, json: true, headers: partial_headers)
   end
 
@@ -184,7 +187,10 @@ class InertiaBuilderTest < Minitest::Test
     template = <<~INERTIA
       prop.id 1
       prop.always! do
-        prop.user 'User'
+        prop.user do
+          prop.id 1
+          prop.email 'user@email.com'
+        end
       end
       prop.optional! do
         prop.calculation 'Calculation'
@@ -195,8 +201,9 @@ class InertiaBuilderTest < Minitest::Test
       'X-Inertia-Partial-Data' => 'calculation',
       'X-Inertia-Partial-Component' => '/'
     }
-    assert_equal inertia_json_with_props({ id: 1, user: 'User' }), render_view(template, json: true)
-    assert_equal inertia_json_with_props({ user: 'User', calculation: 'Calculation' }),
+    assert_equal inertia_json_with_props({ id: 1, user: { id: 1, email: 'user@email.com' } }),
+                 render_view(template, json: true)
+    assert_equal inertia_json_with_props({ user: { id: 1, email: 'user@email.com' }, calculation: 'Calculation' }),
                  render_view(template, json: true, headers: partial_headers)
   end
 
@@ -204,7 +211,10 @@ class InertiaBuilderTest < Minitest::Test
     template = <<~INERTIA
       prop.id 1
       prop.defer! do
-        prop.user 'User'
+        prop.user do
+          prop.id 1
+          prop.email 'user@email.com'
+        end
         prop.calculation 'Calculation'
       end
     INERTIA
@@ -229,10 +239,14 @@ class InertiaBuilderTest < Minitest::Test
   end
 
   def test_defer_block_fetching
+    user = User.new({ id: 1, email: 'user@email.com' })
+
     template = <<~INERTIA
       prop.id 1
       prop.defer! do
-        prop.user 'User'
+        prop.user do
+          prop.partial! @user
+        end
         prop.calculation 'Calculation'
       end
     INERTIA
@@ -242,8 +256,8 @@ class InertiaBuilderTest < Minitest::Test
       'X-Inertia-Partial-Component' => '/'
     }
 
-    assert_equal inertia_json_with_props({ user: 'User', calculation: 'Calculation' }),
-                 render_view(template, json: true, headers: partial_headers)
+    assert_equal inertia_json_with_props({ user: user, calculation: 'Calculation' }),
+                 render_view(template, assigns: { user: user }, json: true, headers: partial_headers)
   end
 
   private

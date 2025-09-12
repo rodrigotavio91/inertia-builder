@@ -74,8 +74,11 @@ module InertiaBuilder
     end
 
     def _merge_values(current_value, updates)
-      # Always override lazy evaluation procs.
-      if current_value.is_a?(::Proc)
+      # Always override lazy evaluation procs. For the other special prop types, InertiaRails already handles merging.
+      if current_value.is_a?(::Proc) ||
+         current_value.is_a?(::InertiaRails::OptionalProp) ||
+         current_value.is_a?(::InertiaRails::AlwaysProp) ||
+         current_value.is_a?(::InertiaRails::DeferProp)
         updates
       else
         super
