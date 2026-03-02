@@ -3,7 +3,6 @@
 require 'rails'
 require 'action_controller/railtie'
 
-require 'jbuilder'
 require 'inertia_rails'
 require 'inertia_builder'
 require 'active_support/testing/autorun'
