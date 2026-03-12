@@ -23,7 +23,7 @@ module InertiaBuilder
         @view_context.controller.render_to_string(
           template: 'inertia',
           layout: false,
-          locals: @inertia_renderer.send(:view_data).merge(page: page)
+          locals: { page: page }
         )
       end
     end
