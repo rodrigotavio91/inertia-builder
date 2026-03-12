@@ -13,7 +13,7 @@ class Item < Struct.new(:id, :title)
   include ActiveModel::Conversion
 end
 
-Paginator = Struct.new(:current, :previous, :next, :param_name)
+Paginator = Struct.new(:current, :previous, :next, :param_name, keyword_init: true)
 
 class PaginatorAdapter
   def match?(metadata)
