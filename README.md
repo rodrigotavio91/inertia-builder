@@ -133,7 +133,7 @@ InertiaBuilder supports [`InertiaRails.scroll`](https://inertia-rails.dev/guide/
 ```ruby
 # Custom metadata
 prop.id @post.id
-prop.scroll!({ page_name: 'page', current_page: 1, previous_page: nil, next_page: 2 }) do
+prop.scroll!(page_name: 'page', current_page: 1, previous_page: nil, next_page: 2) do
   prop.comments @post.comments, partial: 'comments/comment', as: :comment
 end
 

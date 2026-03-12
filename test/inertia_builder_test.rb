@@ -285,7 +285,7 @@ class InertiaBuilderTest < Minitest::Test
 
     template = <<~INERTIA
       prop.id 1
-      prop.scroll!({ page_name: 'page', current_page: 1, previous_page: nil, next_page: 2 }) do
+      prop.scroll!(page_name: 'page', current_page: 1, previous_page: nil, next_page: 2) do
         prop.users @users, partial: 'users/user', as: :user
       end
     INERTIA
@@ -307,7 +307,7 @@ class InertiaBuilderTest < Minitest::Test
 
     template = <<~INERTIA
       prop.id 1
-      prop.scroll!({ page_name: 'page', current_page: 2, previous_page: 1, next_page: 3 }) do
+      prop.scroll!(page_name: 'page', current_page: 2, previous_page: 1, next_page: 3) do
         prop.users @users, partial: 'users/user', as: :user
       end
     INERTIA
