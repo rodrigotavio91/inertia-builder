@@ -13,6 +13,23 @@ class Item < Struct.new(:id, :title)
   include ActiveModel::Conversion
 end
 
+Paginator = Struct.new(:current, :previous, :next, :param_name, keyword_init: true)
+
+class PaginatorAdapter
+  def match?(metadata)
+    metadata.is_a?(Paginator)
+  end
+
+  def call(metadata, **_options)
+    {
+      page_name: metadata.param_name,
+      previous_page: metadata.previous,
+      next_page: metadata.next,
+      current_page: metadata.current
+    }
+  end
+end
+
 class InertiaBuilderTest < Minitest::Test
   USER_PARTIAL = <<~INERTIA
     prop.id user.id
@@ -260,6 +277,79 @@ class InertiaBuilderTest < Minitest::Test
                  render_view(template, assigns: { user: user }, json: true, headers: partial_headers)
   end
 
+  def test_scroll_block
+    users = [
+      User.new(id: 1, first_name: 'John', last_name: 'Smith', email: 'john@email.com'),
+      User.new(id: 2, first_name: 'Jane', last_name: 'Smith', email: 'jane@email.com')
+    ]
+
+    template = <<~INERTIA
+      prop.id 1
+      prop.scroll!(page_name: 'page', current_page: 1, previous_page: nil, next_page: 2) do
+        prop.users @users, partial: 'users/user', as: :user
+      end
+    INERTIA
+
+    expected = inertia_json_with_props(
+      { id: 1, users: users },
+      scrollProps: { users: { pageName: 'page', previousPage: nil, nextPage: 2, currentPage: 1, reset: false } },
+      mergeProps: ['users']
+    )
+
+    assert_equal expected, render_view(template, assigns: { users: users }, json: true)
+  end
+
+  def test_scroll_block_fetching
+    users = [
+      User.new(id: 3, first_name: 'Alice', last_name: 'Jones', email: 'alice@email.com'),
+      User.new(id: 4, first_name: 'Bob', last_name: 'Brown', email: 'bob@email.com')
+    ]
+
+    template = <<~INERTIA
+      prop.id 1
+      prop.scroll!(page_name: 'page', current_page: 2, previous_page: 1, next_page: 3) do
+        prop.users @users, partial: 'users/user', as: :user
+      end
+    INERTIA
+
+    partial_headers = {
+      'X-Inertia-Partial-Data' => 'users',
+      'X-Inertia-Partial-Component' => '/'
+    }
+    expected = inertia_json_with_props(
+      { users: users },
+      scrollProps: { users: { pageName: 'page', previousPage: 1, nextPage: 3, currentPage: 2, reset: false } },
+      mergeProps: ['users']
+    )
+
+    assert_equal expected, render_view(template, assigns: { users: users }, json: true, headers: partial_headers)
+  end
+
+  def test_scroll_block_with_metadata_extractor
+    users = [
+      User.new(id: 1, first_name: 'John', last_name: 'Smith', email: 'john@email.com')
+    ]
+
+    paginator = Paginator.new(current: 1, previous: nil, next: 2, param_name: 'p')
+
+    template = <<~INERTIA
+      prop.id 1
+      prop.scroll!(@paginator) do
+        prop.users @users, partial: 'users/user', as: :user
+      end
+    INERTIA
+
+    with_scroll_metadata_adapater(PaginatorAdapter) do
+      expected = inertia_json_with_props(
+        { id: 1, users: users },
+        scrollProps: { users: { pageName: 'p', previousPage: nil, nextPage: 2, currentPage: 1, reset: false } },
+        mergeProps: ['users']
+      )
+
+      assert_equal expected, render_view(template, assigns: { users: users, paginator: paginator }, json: true)
+    end
+  end
+
   private
 
   def render_view(source, **opts)
@@ -293,5 +383,13 @@ class InertiaBuilderTest < Minitest::Test
       encryptHistory: false,
       clearHistory: false
     }.merge(extra_fields).to_json
+  end
+
+  def with_scroll_metadata_adapater(adapter_class)
+    original_adapters = InertiaRails::ScrollMetadata.adapters.dup
+    InertiaRails::ScrollMetadata.register_adapter(adapter_class)
+    yield
+  ensure
+    InertiaRails::ScrollMetadata.adapters = original_adapters
   end
 end

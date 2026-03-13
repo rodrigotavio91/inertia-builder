@@ -26,12 +26,16 @@ module InertiaBuilder
       _call_inertia_block(:defer, **opts, &block)
     end
 
+    def scroll!(metadata = nil, **opts, &block)
+      _call_inertia_block(:scroll, metadata, **opts, &block)
+    end
+
     def method_missing(name, *args, &block)
       prop = self
 
       if @inertia_block
-        method, opts = @inertia_block
-        _set_value(name, ::InertiaRails.send(method, **opts) { prop.set!(name, *args, &block) })
+        method, positional_args, opts = @inertia_block
+        _set_value(name, ::InertiaRails.send(method, *positional_args, **opts) { prop.set!(name, *args, &block) })
       elsif !@in_scope
         # Lazy evaluate outermost properties.
         _set_value(name, -> { prop.set!(name, *args, &block); })
@@ -42,10 +46,10 @@ module InertiaBuilder
 
     private
 
-    def _call_inertia_block(method, **opts)
+    def _call_inertia_block(method, *args, **opts)
       ::Kernel.raise "Nesting #{method}! in a #{@inertia_block[0]}! block is not allowed" if @inertia_block
 
-      @inertia_block = [method, opts]
+      @inertia_block = [method, args, opts]
       yield
       @inertia_block = nil
     end
@@ -78,7 +82,8 @@ module InertiaBuilder
       if current_value.is_a?(::Proc) ||
          current_value.is_a?(::InertiaRails::OptionalProp) ||
          current_value.is_a?(::InertiaRails::AlwaysProp) ||
-         current_value.is_a?(::InertiaRails::DeferProp)
+         current_value.is_a?(::InertiaRails::DeferProp) ||
+         current_value.is_a?(::InertiaRails::ScrollProp)
         updates
       else
         super

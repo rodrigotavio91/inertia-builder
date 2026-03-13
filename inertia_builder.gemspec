@@ -13,7 +13,7 @@ Gem::Specification.new do |s|
 
   s.required_ruby_version = '>= 3.0.0'
 
-  s.add_dependency 'inertia_rails', '~> 3.5'
+  s.add_dependency 'inertia_rails', '~> 3.12'
   s.add_dependency 'jbuilder', '~> 2.0'
 
   s.add_development_dependency 'appraisal'

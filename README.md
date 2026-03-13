@@ -126,6 +126,25 @@ prop.defer! group: :comments do
 end
 ```
 
+## Infinite scrolling
+
+InertiaBuilder supports [`InertiaRails.scroll`](https://inertia-rails.dev/guide/infinite-scroll) infinite scrolling.
+
+```ruby
+# Custom metadata
+prop.id @post.id
+prop.scroll!(page_name: 'page', current_page: 1, previous_page: nil, next_page: 2) do
+  prop.comments @post.comments, partial: 'comments/comment', as: :comment
+end
+
+# Pagy instance
+prop.id @post.id
+prop.scroll!(@pagy) do
+  prop.comments @records, partial: 'comments/comment', as: :comment
+end
+```
+
+See the `inertia-rails` documentation for the [supported pagination libraries](https://inertia-rails.dev/guide/infinite-scroll#inertiarails-scroll-method), and how to create [custom pagination adapters](https://inertia-rails.dev/guide/infinite-scroll#custom-pagination-adapters).
 
 ## Installation
 
