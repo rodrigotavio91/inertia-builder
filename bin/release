@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+VERSION=$1
+
+printf "module InertiaBuilder\n  VERSION = \"$VERSION\"\nend\n" > ./lib/inertia_builder/version.rb
+bundle
+git add lib/inertia_builder/version.rb
+git commit -m "Bump version for $VERSION"
+git push
+git tag v$VERSION
+git push --tags
+gem build inertia_builder.gemspec
+gem push "inertia_builder-$VERSION.gem" --host https://rubygems.org
+rm "inertia_builder-$VERSION.gem"
